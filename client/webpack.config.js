@@ -18,12 +18,57 @@ module.exports = () => {
       path: path.resolve(__dirname, 'dist'),
     },
     plugins: [
-      
+      // webpack plugin that generates html file and injects bundle
+      new HtmlWebpackPlugin({
+        template: `./index.html`,
+        title: `Text Editor!`,
+      }),
+
+      // injects custom service worker
+      new InjectManifest({
+        swSrc: `./src-sw.js`,
+        swDest: `src-sw.js`,
+      }),
+
+      // creates manifest.json
+      new WebpackPwaManifest({
+        fingerprints: false,
+        inject: true,
+        name: 'Text Editor Service Worker',
+        short_name: 'TESW',
+        description:  'pretty please work',
+        background_color: '#225ca3',
+        theme_color: '#225ca3',
+        id: './',
+        start_url: './',
+        publicPath: './',
+        icons: [
+          {
+            src: path.resolve('src/images/logo.png'),
+            sizes: [96, 128, 192, 256, 384, 512],
+            destination: path.join('assets', 'icons'),
+          },
+        ],
+      }),
     ],
 
     module: {
       rules: [
-        
+        {
+          test: /\.css$/i,
+          use: [`style-loader`, `css-loader`],
+        },
+        {
+          test: /\.m?js$/,
+          exclude: /(node_modules|bower_components)/,
+          use: {
+            loader: `babel-loader`,
+            options: {
+              presets: [`@babel/present-env`],
+              plugins: ['@babel/plugin-proposal-object-rest-spread', '@babel/transform-runtime'],
+            }
+          }
+        },
       ],
     },
   };
